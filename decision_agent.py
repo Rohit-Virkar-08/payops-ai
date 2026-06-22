@@ -32,14 +32,12 @@ from decimal import Decimal
 from extraction_agent import ExtractionResult
 from po_matching_agent import POMatchResult
 from verification_agent import VerificationResult
-from po_store import LedgerEntry, POStore, _to_decimal
+from po_store import LedgerEntry, POStore
 
 # --------------------------------------------------------------------------- #
 # Duplicate detection (folded into the decision agent)
 # --------------------------------------------------------------------------- #
-_AMOUNT_TOL = Decimal("0.01")     # amounts within 1% count as "same"
-_DATE_WINDOW_DAYS = 45            # near-dup only if dates are within this window
-_VENDOR_SIM = 85.0               # fuzzy vendor similarity to count as same vendor
+_VENDOR_SIM = 85.0    # fuzzy vendor similarity threshold to count as same vendor
 
 
 class DupStatus:
@@ -74,49 +72,43 @@ def _parse_date(s: str | None):
 
 
 def detect_duplicate(result: ExtractionResult, store: POStore) -> DuplicateResult:
-    """Duplicate identity is (vendor + invoice number), because invoice numbers are
-    vendor-assigned and only unique WITHIN a vendor:
+    """Duplicate identity is (vendor + invoice number).
 
-      same vendor + same invoice #            -> CONFIRMED (true re-billing)
-      same invoice # but a DIFFERENT vendor   -> SUSPECTED (number collision, not a dup)
-      same vendor + same amount + close date  -> SUSPECTED (near-duplicate)
+    Invoice numbers are vendor-assigned and unique only within that vendor's own
+    sequence, so the authoritative duplicate key is the combination of both:
+
+      same vendor + same invoice #          -> CONFIRMED  (true re-billing, hard stop)
+      same invoice # + DIFFERENT vendor     -> SUSPECTED  (number collision, needs a
+                                                           human glance to confirm the
+                                                           vendor identity is correct)
+
+    Same vendor + same amount with a different invoice number is NOT flagged:
+    vendors legitimately raise multiple invoices for the same amount (monthly
+    retainers, repeat orders, split deliveries).
     """
     f = result.fields
     inv_no = (f.invoice_number.value or "").strip()
     vendor = f.vendor_name.value
-    amount = _to_decimal(f.total_amount.value)
-    inv_date = _parse_date(f.invoice_date.value)
 
     out = DuplicateResult()
     collisions: list[LedgerEntry] = []   # same invoice #, different vendor
     for e in store.ledger:
+        if not (inv_no and e.invoice_number.strip().upper() == inv_no.upper()):
+            continue
         same_vendor = store.vendor_similarity(vendor, e.vendor) >= _VENDOR_SIM
-        if inv_no and e.invoice_number.strip().upper() == inv_no.upper():
-            # A matching invoice number is only a real duplicate if it's the SAME
-            # vendor; the same number from a different vendor is a coincidence.
-            (out.exact_matches if same_vendor else collisions).append(e)
-            continue
-        same_amount = amount > 0 and abs(e.amount - amount) <= amount * _AMOUNT_TOL
-        if not (same_vendor and same_amount):
-            continue
-        led_date = _parse_date(e.date)
-        if inv_date and led_date and abs((inv_date - led_date).days) > _DATE_WINDOW_DAYS:
-            continue
-        out.near_matches.append(e)
+        (out.exact_matches if same_vendor else collisions).append(e)
 
     if out.exact_matches:
         out.status = DupStatus.CONFIRMED
         nums = ", ".join(sorted({e.invoice_number for e in out.exact_matches}))
         out.reasons.append(f"same vendor + invoice number {inv_no} already in ledger ({nums})")
-    elif out.near_matches or collisions:
+    elif collisions:
         out.status = DupStatus.SUSPECTED
-        for e in out.near_matches:
-            out.reasons.append(f"same vendor + amount {e.amount} as {e.invoice_number} (dated {e.date})")
         for e in collisions:
             out.near_matches.append(e)
             out.reasons.append(
-                f"invoice number {inv_no} also used by a different vendor "
-                f"('{e.vendor}') — likely a number collision, confirm the vendor")
+                f"invoice number {inv_no} also exists in ledger under a different vendor "
+                f"('{e.vendor}') — likely a number coincidence, confirm vendor identity")
     return out
 
 

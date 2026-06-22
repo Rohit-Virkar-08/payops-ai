@@ -1,6 +1,8 @@
 PO_Number,Vendor,Approved_Amount,Approval_Status,Billed_Amount,Pending_Amount,Billing_Status,Last_Updated
-PO-456,abc technologies,60000,Approved,30000.00,30000.00,PARTIALLY_BILLED,2026-06-22
-PO-777,Mega Industrial,60000,Approved,60900.00,-900.00,FULLY_BILLED,2026-06-22
-PO-888,Global Parts,100000,Approved,0,100000,OPEN,
-PO-900,Scan Corp,12000,Approved,0,12000,OPEN,
-4587,Metro Components pvt ltd,45000,Approved,20000.00,25000.00,PARTIALLY_BILLED,2026-06-22
+PO-456,abc technologies,60000.0,Approved,60000.00,0.00,FULLY_BILLED,2026-06-23
+PO-777,Mega Industrial,60000.0,Approved,60900.00,-900.00,FULLY_BILLED,2026-06-23
+PO-888,Global Parts,100000.0,Approved,0,100000.0,OPEN,
+PO-900,Scan Corp,12000.0,Approved,0,12000.0,OPEN,
+4587,Metro Components pvt ltd,45000.0,Approved,0,45000.0,OPEN,
+,,0,,0,0,ON_HOLD,
+,,0,,0,0,ON_HOLD,

@@ -3,6 +3,16 @@ Invoice_Number,PO_Number,Vendor,Amount,Status,Date
 ,,,,,
 ,,,,,
 ,,,,,
-ACME-2026-001,PO-456,abc technologies,30000.00,Approved,2026-06-22
-MC-7001,4587,Metro Components pvt ltd,20000.00,Approved,2026-06-22
-MEGA-5521,PO-777,Mega Industrial,60900.00,Approved,2026-06-22
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+ACME-2026-001,PO-456,abc technologies,30000.00,Approved,2026-06-23
+ACME-2026-002,PO-456,abc technologies,30000.00,Approved,2026-06-23
+MEGA-5521,PO-777,Mega Industrial,60900.00,Approved,2026-06-23

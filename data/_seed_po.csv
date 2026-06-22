@@ -1,0 +1,6 @@
+PO_Number,Vendor,Approved_Amount,Approval_Status,Billed_Amount,Pending_Amount,Billing_Status,Last_Updated
+PO-456,abc technologies,60000,Approved,0,60000,OPEN,
+PO-777,Mega Industrial,60000,Approved,0,60000,OPEN,
+PO-888,Global Parts,100000,Approved,0,100000,OPEN,
+PO-900,Scan Corp,12000,Approved,0,12000,OPEN,
+4587,Metro Components pvt ltd,45000,Approved,0,45000,OPEN,

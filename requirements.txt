@@ -9,3 +9,4 @@ rapidfuzz
 python-dateutil
 pydantic
 dotenv
+openai
